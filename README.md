@@ -1,72 +1,50 @@
 # ApplyTrack API
 
-REST API to track job and internship applications (Praktikum / Werkstudent / Junior roles).
+REST API for tracking job and internship applications (Praktikum, Werkstudent, Junior roles).
 
-Solo Spring Boot project — layered architecture (controller → service → repository), validation, global error handling, automated tests, Swagger docs, and PostgreSQL via Docker.
+Spring Boot project with a layered architecture (controller, service, repository), request validation, centralized error handling, automated tests, OpenAPI documentation, and optional PostgreSQL support via Docker.
 
 ## Tech stack
 
-- Java 25
-- Spring Boot 4
+- Java 25, Spring Boot 4
 - Spring Web, Spring Data JPA, Validation
-- H2 (in-memory) — default profile, used for quick dev and tests
-- PostgreSQL 16 — optional profile with Docker Compose
+- H2 (default) · PostgreSQL 16 (Docker)
 - springdoc-openapi (Swagger UI)
-- Docker, Docker Compose
 - JUnit 5, Mockito, MockMvc
 
-## Features
+## Getting started
 
-- Full CRUD for applications (`/api/applications`)
-- Filter by status: `GET /api/applications?status=INTERVIEW`
-- Stats: `GET /api/applications/stats` (total + count per status)
-- Validation (`@NotBlank` on company/role)
-- Consistent JSON errors for 404 / 400 via `@RestControllerAdvice`
-- Interactive API docs (Swagger UI)
-- Unit tests (service) + MockMvc test (validation → 400)
-- PostgreSQL with persistent data via Docker volume
+**Requirements:** JDK 25, Maven (or IntelliJ). Docker is required only for the PostgreSQL setup.
 
-## Application statuses
-
-`SAVED`, `APPLIED`, `INTERVIEW`, `OFFER`, `REJECTED`, `GHOSTED`
-
-## Run
-
-Prerequisites: JDK 25, Maven (or IntelliJ).
-
-### Option A — H2 (default, no Docker)
+### H2 (default profile)
 
 ```bash
 mvn spring-boot:run
 ```
 
-Or run `ApplytrackApiApplication` from IntelliJ (no active profile).
+Application URL: `http://localhost:8080`
 
-API base: `http://localhost:8080`
+H2 console: `http://localhost:8080/h2-console` — JDBC URL: `jdbc:h2:mem:applytrack`
 
-H2 console (optional): `http://localhost:8080/h2-console`  
-(JDBC URL: `jdbc:h2:mem:applytrack`)
+The default profile uses an in-memory database. Data does not persist between application restarts.
 
-> H2 is in-memory — data is lost after restart.
+### PostgreSQL (Docker)
 
-### Option B — PostgreSQL (Docker)
-
-1. Start the database:
+Start the database:
 
 ```bash
 docker compose up -d
 ```
 
-2. Run the app with the `postgres` profile:
+Run the application with the `postgres` profile:
 
 ```bash
 mvn spring-boot:run -Dspring-boot.run.profiles=postgres
 ```
 
-Or in IntelliJ: Run Configuration → **Active profiles:** `postgres`
+In IntelliJ, set **Active profiles** to `postgres` in the run configuration.
 
-> Data persists across app restarts (stored in Docker volume `applytrack-data`).  
-> Keep Docker Desktop running. Do not use `docker compose down -v` unless you want to wipe data.
+Data is stored in the Docker volume `applytrack-data` and persists across application restarts. To reset the database, run `docker compose down -v`.
 
 Stop the database:
 
@@ -76,25 +54,29 @@ docker compose down
 
 ## API documentation
 
-Swagger UI: `http://localhost:8080/swagger-ui.html`  
-OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
 ## Endpoints
 
 | Method | URL | Description |
 |--------|-----|-------------|
-| GET | `/api/applications` | List all |
+| GET | `/api/applications` | List all applications |
 | GET | `/api/applications?status=APPLIED` | Filter by status |
-| GET | `/api/applications/{id}` | Get one |
-| POST | `/api/applications` | Create (201) |
-| PUT | `/api/applications/{id}` | Update |
-| DELETE | `/api/applications/{id}` | Delete (204) |
-| GET | `/api/applications/stats` | Totals per status |
+| GET | `/api/applications/{id}` | Get application by ID |
+| POST | `/api/applications` | Create application (201) |
+| PUT | `/api/applications/{id}` | Update application |
+| DELETE | `/api/applications/{id}` | Delete application (204) |
+| GET | `/api/applications/stats` | Application count per status |
 
-### Example: create
+**Application statuses:** `SAVED`, `APPLIED`, `INTERVIEW`, `OFFER`, `REJECTED`, `GHOSTED`
+
+Validation errors (400) and missing resources (404) are returned as structured JSON via `@RestControllerAdvice`.
+
+### Request example
 
 ```http
-POST http://localhost:8080/api/applications
+POST /api/applications
 Content-Type: application/json
 
 {
@@ -107,7 +89,7 @@ Content-Type: application/json
 }
 ```
 
-### Example: error (404)
+### Error response example (404)
 
 ```json
 {
@@ -120,13 +102,13 @@ Content-Type: application/json
 ## Project structure
 
 ```
-controller/   → HTTP mapping, ResponseEntity
-service/      → business logic (CRUD, stats)
-repository/   → Spring Data JPA
-model/        → entities & enums
-dto/          → ErrorResponse, ApplicationStatsResponse
-exceptions/   → ApplicationNotFoundException
-config/       → OpenAPI configuration
+controller/    REST layer
+service/       Business logic
+repository/    Spring Data JPA
+model/         Entities and enums
+dto/           API response objects
+exceptions/    Custom exceptions
+config/        OpenAPI configuration
 ```
 
 ## Tests
@@ -135,10 +117,10 @@ config/       → OpenAPI configuration
 mvn test
 ```
 
-Tests run on H2 (default profile) — no Docker required.
+Tests use the H2 profile and do not require Docker.
 
-- `ApplicationServiceTest` — stats zeros, not-found exception (Mockito)
-- `ApplicationControllerTest` — blank company → 400 (MockMvc)
+- `ApplicationServiceTest` — service layer (Mockito)
+- `ApplicationControllerTest` — validation and error responses (MockMvc)
 
 ## Author
 
