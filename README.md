@@ -11,6 +11,7 @@ Solo Spring Boot project — layered architecture (controller → service → re
 - Spring Web, Spring Data JPA, Validation
 - H2 (in-memory) for local development
 - JUnit 5, Mockito, MockMvc
+- springdoc-openapi (Swagger UI)
 
 ## Features
 
@@ -21,6 +22,12 @@ Solo Spring Boot project — layered architecture (controller → service → re
 - Consistent JSON errors for 404 / 400 via `@RestControllerAdvice`
 - Unit tests (service) + MockMvc test (validation → 400)
 
+## API documentation
+
+Swagger UI: `http://localhost:8080/swagger-ui.html`  
+OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
+
 ## Application statuses
 
 `SAVED`, `APPLIED`, `INTERVIEW`, `OFFER`, `REJECTED`, `GHOSTED`
@@ -28,6 +35,7 @@ Solo Spring Boot project — layered architecture (controller → service → re
 ## Run
 
 Prerequisites: JDK 25, Maven (or IntelliJ).
+
 
 ```bash
 mvn spring-boot:run
@@ -41,6 +49,11 @@ H2 console (optional): `http://localhost:8080/h2-console`
 (JDBC URL: `jdbc:h2:mem:applytrack`)
 
 > Note: H2 is in-memory — data is lost after restart.
+
+## API documentation
+
+Swagger UI: `http://localhost:8080/swagger-ui.html`  
+OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
 ## Endpoints
 
