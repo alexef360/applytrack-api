@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: applytrack-db
+    environment:
+      POSTGRES_DB: applytrack
+      POSTGRES_USER: applytrack
+      POSTGRES_PASSWORD: applytrack
+    ports:
+      - "5432:5432"
+    volumes:
+      - applytrack-data:/var/lib/postgresql/data
+
+volumes:
+  applytrack-data:
