@@ -1,8 +1,10 @@
 package com.alex.applytrackapi.controller;
 
+import com.alex.applytrackapi.dto.AiSummaryResponse;
 import com.alex.applytrackapi.dto.ApplicationStatsResponse;
 import com.alex.applytrackapi.model.Application;
 import com.alex.applytrackapi.model.ApplicationStatus;
+import com.alex.applytrackapi.service.ApplicationAiService;
 import com.alex.applytrackapi.service.ApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,9 +21,11 @@ import java.util.List;
 public class ApplicationController {
 
     private final ApplicationService service;
+    private final ApplicationAiService aiService;
 
-    public ApplicationController(ApplicationService service) {
+    public ApplicationController(ApplicationService service, ApplicationAiService aiService) {
         this.service = service;
+        this.aiService = aiService;
     }
 
     @GetMapping
@@ -54,6 +58,12 @@ public class ApplicationController {
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "AI summary and follow-up suggestion")
+    @PostMapping("/{id}/ai/summary")
+    public AiSummaryResponse sumarize (@PathVariable Long id) {
+        return aiService.summarizeApplication(id);
     }
 
     @Operation(summary = "Get application stats", description = "Total count and count per status")
